@@ -1,4 +1,5 @@
 Shuxia Music Release
+自用车机应用客户端
 
 这里只发布 Android APK，不包含源码。
 
