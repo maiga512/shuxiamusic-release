@@ -1,0 +1,43 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/app/build
+*_backup.txt
+server-upload.zip
+
+.ai/
+
+.tmp/
+graphify-out/
+docs/AI_REPOMIX_CONTEXT.md
+
+# 只读/受限目录
+.tmp_remote/
+DsoMusic/
+com/
+tmp_qjs_src/
+.kotlin/
+
+# macOS AppleDouble 文件
+._*
+
+# 性能测试快照
+perf-*/
+
+# 临时编译产物
+build_error.txt
+build_release.log
+build_full.txt
+
+# 临时 XML 文件
+current.xml
+current2.xml
+matrix*.xml
+restart*.xml
