@@ -7,21 +7,24 @@
 
 | 端 | 它是干嘛的 | 当前版本 | 下载地址 |
 | --- | --- | --- | --- |
-| **安卓 / 车机版** | 面向车机、平板和横向大屏的安卓音乐播放器：多平台搜索、多音质播放、歌词、频谱、歌单管理、洛雪插件；支持应用内自动更新 | v2.5.109 | [最新版 APK（本仓库最新 Release）](https://github.com/maiga512/shuxiamusic-release/releases/latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-release) |
-| **Mac 桌面版** | 桌面端音乐播放器（Tauri + Rust + Vue），功能与安卓版对齐：搜索、播放、歌词、歌单、多端同步 | v1.0.6 | [desktop-latest（本仓库固定标签）](https://github.com/maiga512/shuxiamusic-release/releases/tag/desktop-latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-desktop-release) |
+| **树夏Music 安卓** | 面向车机、平板和横向大屏的安卓音乐播放器：多平台搜索、多音质播放、歌词、频谱、歌单管理、洛雪插件；支持应用内自动更新 | v2.5.109 | [最新版 APK（本仓库最新 Release）](https://github.com/maiga512/shuxiamusic-release/releases/latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-release) |
+| **树夏Music 桌面端** | 桌面端音乐播放器（Tauri + Rust + Vue），功能与安卓版对齐：搜索、播放、歌词、歌单、多端同步 | v1.0.6 | [desktop-latest（本仓库固定标签）](https://github.com/maiga512/shuxiamusic-release/releases/tag/desktop-latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-desktop-release) |
 | **树夏Music 同步服务器** | 部署在自家 NAS 上的歌单同步服务（Docker 一键部署）：保存用户、歌单、歌曲和收藏关系，各端客户端都连它同步 | v0.1.0 | [仓库与部署文档](https://github.com/maiga512/CeruMusic-NAS-Sync) |
-| **飞牛在线听歌插件** | 专为飞牛 fnOS 自带音乐应用打造的无侵入增强扩展：在线聚合搜播（网易/57 平台聚合/洛雪源）、管理 WebUI、边听边存、多端同步 | v2.6.50 | [.fpk 安装包（本仓库 Release 附件）](https://github.com/maiga512/shuxiamusic-release/releases/tag/fnos-fnmusic-ext-v2.6.50) · [项目源码](https://github.com/maiga512/fnos_music_ext) |
+| **飞牛在线听歌插件** | 基于 @javycoder 同名开源项目改编增强（版权归原作者）：面向飞牛 fnOS 自带音乐应用的无侵入扩展，在线聚合搜播、管理 WebUI、边听边存，本版本增加多端同步 | v2.6.50 | [.fpk 安装包（本仓库 Release 附件）](https://github.com/maiga512/shuxiamusic-release/releases/tag/fnos-fnmusic-ext-v2.6.50) · [项目源码](https://github.com/maiga512/fnos_music_ext) |
 
 > 版本说明：表中「当前版本」随发布更新；安卓版应用内更新读取本仓库**最新 Release**，
 > Mac 版读取本仓库固定标签 **desktop-latest**，两者互不干扰。
 
 ## 飞牛在线听歌插件（fnmusic-ext）
 
+> **来源说明**：本插件基于开源作者 [@javycoder](https://github.com/javycoder) 的 [fnos_music_ext（飞牛音乐扩展）](https://github.com/javycoder/fnos_music_ext) 改编，上游项目版权归原作者所有；
+> 本版本在其基础上增加了与树夏Music 同步服务器的多端同步等能力。
+
 - 只接管飞牛官方后端的通信入口，不修改官方程序、nginx 配置与数据库，可随时还原官方直连
 - 在官方搜索框输入歌名即聚合在线音源，即点即播，自动补滚动歌词与高清封面；本地曲库优先
 - 管理 WebUI（仅本机 8774）：音源切换、网易扫码、洛雪源配置、多端同步、音质偏好、边听边存
 - 安装：飞牛桌面「应用中心」→ 自定义安装 → 选择本仓库 Release 里的 `fnmusic-ext-x.x.x.fpk`
-- 官方项目（上游）：[github.com/javycoder/fnos_music_ext](https://github.com/javycoder/fnos_music_ext) · [gitee.com/javycoder/fnos_music_ext](https://gitee.com/javycoder/fnos_music_ext)
+- 上游原作者项目：[github.com/javycoder/fnos_music_ext](https://github.com/javycoder/fnos_music_ext) · [gitee.com/javycoder/fnos_music_ext](https://gitee.com/javycoder/fnos_music_ext) · 作者 GitHub 主页：[github.com/javycoder](https://github.com/javycoder)
 
 ## 树夏Music 同步服务器
 
