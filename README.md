@@ -12,8 +12,11 @@
 | **树夏Music 同步服务器** | 部署在自家 NAS 上的歌单同步服务（Docker 一键部署）：保存用户、歌单、歌曲和收藏关系，各端客户端都连它同步 | v0.1.0 | [仓库与部署文档](https://github.com/maiga512/CeruMusic-NAS-Sync) |
 | **飞牛在线听歌插件** | 基于 @javycoder 同名开源项目改编增强（版权归原作者）：面向飞牛 fnOS 自带音乐应用的无侵入扩展，在线聚合搜播、管理 WebUI、边听边存，本版本增加多端同步 | v2.6.50 | [.fpk 安装包（本仓库 Release 附件）](https://github.com/maiga512/shuxiamusic-release/releases/tag/fnos-fnmusic-ext-v2.6.50) · [项目源码](https://github.com/maiga512/fnos_music_ext) |
 
-> 版本说明：表中「当前版本」随发布更新；安卓版应用内更新读取本仓库**最新 Release**，
+> 版本说明：表中「当前版本」随发布自动更新（发版脚本自动改这张表）；安卓版应用内更新读取本仓库**最新 Release**，
 > Mac 版读取本仓库固定标签 **desktop-latest**，两者互不干扰。
+>
+> **全部历史版本**（安卓 / 桌面 / 飞牛插件，每个版本一个 Release，可直接下载旧版本）：
+> [GitHub Release 列表](https://github.com/maiga512/shuxiamusic-release/releases) · [Gitee Release 列表](https://gitee.com/songsong2020/shuxiamusic-release/releases)
 
 ## 飞牛在线听歌插件（fnmusic-ext）
 
