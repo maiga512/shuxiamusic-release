@@ -1,135 +1,70 @@
-# 🎵 树夏Music (树夏音乐 / shuxiaMusic)
+# 树夏Music 多端发布中心
 
-一个基于 Jetpack Compose 的 Android 音乐播放器，支持多平台音乐搜索和播放。
+树夏Music 是一套「安卓/车机 + Mac 桌面 + NAS 同步服务器 + 飞牛在线听歌」的多端音乐方案。
+各端共享同一套歌单、收藏和播放记忆：在任意一端收藏歌曲或建歌单，其它端自动同步。
 
-[![GitHub stars](https://img.shields.io/github/stars/88541/YinDong-Music?style=flat-square)](https://github.com/88541/YinDong-Music/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/88541/YinDong-Music?style=flat-square)](https://github.com/88541/YinDong-Music/network)
-[![GitHub license](https://img.shields.io/github/license/88541/YinDong-Music?style=flat-square)](https://github.com/88541/YinDong-Music/blob/main/LICENSE)
+## 产品与下载
 
-## 📱 应用截图
+| 端 | 它是干嘛的 | 当前版本 | 下载地址 |
+| --- | --- | --- | --- |
+| **树夏Music 安卓** | 面向车机、平板和横向大屏的安卓音乐播放器：多平台搜索、多音质播放、歌词、频谱、歌单管理、洛雪插件；支持应用内自动更新 | v2.5.113 | [最新版 APK（本仓库最新 Release）](https://github.com/maiga512/shuxiamusic-release/releases/latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-release) |
+| **树夏Music 桌面端** | 桌面端音乐播放器（Tauri + Rust + Vue），功能与安卓版对齐：搜索、播放、歌词、歌单、多端同步 | v1.0.8 | [desktop-latest（本仓库固定标签）](https://github.com/maiga512/shuxiamusic-release/releases/tag/desktop-latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-desktop-release) |
+| **树夏Music 同步服务器** | 部署在自家 NAS 上的歌单同步服务（Docker 一键部署）：保存用户、歌单、歌曲和收藏关系，各端客户端都连它同步 | v0.1.0 | [仓库与部署文档](https://github.com/maiga512/CeruMusic-NAS-Sync) |
+| **飞牛在线听歌插件** | 基于 @javycoder 同名开源项目改编增强（版权归原作者）：面向飞牛 fnOS 自带音乐应用的无侵入扩展，在线聚合搜播、管理 WebUI、边听边存，本版本增加多端同步 | v2.6.54 | [.fpk 安装包（本仓库 Release 附件）](https://github.com/maiga512/shuxiamusic-release/releases/tag/fnos-fnmusic-ext-v2.6.54) · [项目源码](https://github.com/maiga512/fnos_music_ext) |
 
-![播放器界面](http://yindong.zh2026.cn/jt.jpg)
-*精美的圆形封面 + 环形频谱可视化效果*
+> 版本说明：表中「当前版本」随发布自动更新（发版脚本自动改这张表）；安卓版应用内更新读取本仓库**最新 Release**，
+> Mac 版读取本仓库固定标签 **desktop-latest**，两者互不干扰。
+>
+> **全部历史版本**（安卓 / 桌面 / 飞牛插件，每个版本一个 Release，可直接下载旧版本）：
+> [GitHub Release 列表](https://github.com/maiga512/shuxiamusic-release/releases) · [Gitee Release 列表](https://gitee.com/songsong2020/shuxiamusic-release/releases)
 
-## ✨ 功能特性
+## 飞牛在线听歌插件（fnmusic-ext）
 
-### 🎧 核心播放功能
+> **来源说明**：本插件基于开源作者 [@javycoder](https://github.com/javycoder) 的 [fnos_music_ext（飞牛音乐扩展）](https://github.com/javycoder/fnos_music_ext) 改编，上游项目版权归原作者所有；
+> 本版本在其基础上增加了与树夏Music 同步服务器的多端同步等能力。
 
-- **多平台音乐搜索** - 支持网易云、QQ音乐、酷我音乐、酷狗音乐四大平台
-- **在线播放** - 支持在线试听，无需下载
-- **多种音质选择** - 标准(128kbps)、极高(320kbps)、无损(FLAC)、Hi-Res、超清母带
-- **歌词显示** - 支持同步歌词、翻译歌词
-- **播放模式** - 顺序播放、随机播放、单曲循环、列表循环
-- **音频可视化** - 128条频谱条环绕封面，随音乐实时律动
+- 只接管飞牛官方后端的通信入口，不修改官方程序、nginx 配置与数据库，可随时还原官方直连
+- 在官方搜索框输入歌名即聚合在线音源，即点即播，自动补滚动歌词与高清封面；本地曲库优先
+- 管理 WebUI（仅本机 8774）：音源切换、网易扫码、洛雪源配置、多端同步、音质偏好、边听边存
+- 安装：飞牛桌面「应用中心」→ 自定义安装 → 选择本仓库 Release 里的 `fnmusic-ext-x.x.x.fpk`
+- 上游原作者项目：[github.com/javycoder/fnos_music_ext](https://github.com/javycoder/fnos_music_ext) · [gitee.com/javycoder/fnos_music_ext](https://gitee.com/javycoder/fnos_music_ext) · 作者 GitHub 主页：[github.com/javycoder](https://github.com/javycoder)
 
-### 🔍 搜索与发现
+## 树夏Music 同步服务器
 
-- **实时搜索建议** - 输入时自动提示相关搜索词
-- **热搜榜单** - 显示热门搜索关键词
-- **链接解析** - 支持抖音/汽水音乐分享链接自动解析播放
-- **搜索历史** - 保存搜索记录，方便快速搜索
-- **分类发现** - 抖音热歌、伤感情歌、怀旧金曲等分类
-
-### 📂 歌单管理
-
-- **创建歌单** - 自定义创建个人歌单
-- **收藏歌曲** - 收藏喜欢的歌曲到歌单
-- **添加到歌单** - 将歌曲添加到指定歌单
-- **播放全部** - 一键播放歌单所有歌曲
-
-### ⬇️ 下载功能
-
-- **多音质下载** - 支持多种音质下载
-- **下载管理** - 查看和管理已下载的歌曲
-
-### 🔌 插件系统（高级功能）
-
-- **LX Plugin 支持** - 支持洛雪音乐插件扩展
-- **多源切换** - 可在不同音乐源之间切换
-- **自定义API** - 支持自定义API地址
-
-## 🎨 UI 特性
-
-- **暗色主题** - 精美的深色界面设计
-- **频谱可视化** - 128条紫色频谱条环绕封面，随音乐律动
-- **封面旋转** - 播放时封面自动旋转
-- **沉浸式体验** - 全屏歌词、沉浸式播放界面
-- **底部导航** - 首页、发现、我的 三大模块
-
-## 🛠️ 技术栈
-
-- **Kotlin** - 现代 Android 开发语言
-- **Jetpack Compose** - 声明式 UI 框架
-- **Kotlin Coroutines** - 异步编程
-- **OkHttp** - 网络请求
-- **ExoPlayer** - 音频播放
-- **Coil** - 图片加载
-- **Material Design 3** - 设计规范
-
-## 📦 安装方式
-
-### 方式一：下载 APK
-
-从 [Releases](https://github.com/88541/YinDong-Music/releases) 页面下载最新版本的 APK 文件安装。
-
-### 方式二：自行编译
-
-1. **克隆仓库**
-   
-   ```bash
-   git clone https://github.com/88541/YinDong-Music.git
-   ```
-
-2. **打开项目**
-   使用 Android Studio 打开项目目录
-
-3. **编译运行**
-   点击 Run 按钮编译并安装到设备
-
-## ⚙️ 配置说明
-
-### API 配置
-
-项目使用第三方音乐 API，如需自定义 API 地址，请在设置中配置。
-
-### 插件配置
-
-支持 LX Music 插件格式，可在设置中导入插件扩展音乐源。
-
-## 🤝 贡献指南
-
-欢迎提交 Issue 和 Pull Request！
-
-1. Fork 本仓库
-2. 创建你的特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交你的更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开一个 Pull Request
-
-## 📄 开源协议
-
-本项目采用 [MIT](LICENSE) 协议开源。
-
-## 💬 联系我们
-
-- **官方 QQ 群**: [673778042](https://github.com/88541/YinDong-Music#) - 树夏Music×众和夜雨科
-- **GitHub Issues**: [提交问题](https://github.com/88541/YinDong-Music/issues)
-
-## 🙏 致谢
-
-感谢以下开源项目：
-
-- [Jetpack Compose](https://developer.android.com/jetpack/compose)
-- [ExoPlayer](https://github.com/google/ExoPlayer)
-- [OkHttp](https://github.com/square/okhttp)
-- [Coil](https://github.com/coil-kt/coil)
-
-## ⚠️ 免责声明
-
-本项目仅供学习交流使用，请勿用于商业用途。音乐版权归原平台所有。
+- 自部署在 NAS（Docker + SQLite），默认端口 `31231`，含 Web 管理页
+- 安卓 / Mac / 飞牛插件的「多端同步」功能都通过它交换歌单、收藏与播放记忆
+- 部署步骤见[仓库 README](https://github.com/maiga512/CeruMusic-NAS-Sync)：`docker compose up -d --build` 后在 `http://NAS地址:31231` 管理
 
 ---
 
-<p align="center">
-  Made with ❤️ by 树夏Music团队
-</p>
+## 安卓版（历史段落保留）
+
+### 软件界面截图
+
+![树夏music 软件界面截图](screenshots/product/current-pad-dark-music.png)
+
+![树夏music 软件界面截图](screenshots/product/current-pad-dark-podcast.png)
+
+![树夏music 软件界面截图](screenshots/product/current-pad-dark-player.png)
+
+### 最低运行配置
+
+| 项目 | 要求 |
+| --- | --- |
+| Android 系统 | Android 8.0 / API 26 及以上 |
+| 处理器 | `armeabi-v7a` 或 `arm64-v8a` 的 Android 车机 / 平板 |
+| 内存 | 2 GB RAM 及以上 |
+| 屏幕 | 建议 1280 × 720 及以上的横向屏幕 |
+| 网络 | 需要可用网络 |
+| 可用存储 | 至少预留 1 GB；下载歌曲时需额外预留媒体文件空间 |
+
+### 推荐体验配置
+
+| 项目 | 建议 |
+| --- | --- |
+| Android 系统 | Android 10 / API 29 及以上 |
+| 处理器 | 64 位 `arm64-v8a` |
+| 内存 | 4 GB RAM 及以上 |
+| 屏幕 | 1280 × 720、1920 × 720 或更高分辨率横向屏幕 |
+
+> Android 8.0 是项目的实际最低系统版本；其余项目为对外推荐配置。
