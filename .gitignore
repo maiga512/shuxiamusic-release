@@ -41,3 +41,9 @@ current.xml
 current2.xml
 matrix*.xml
 restart*.xml
+
+# === 本地发布凭证与私密记录（绝不上传）===
+scripts/.gitee_token
+scripts/.github_token
+发布_私密记录.md
+docs/RELEASE_PRIVATE.md
