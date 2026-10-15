@@ -8,7 +8,7 @@
 | 端 | 它是干嘛的 | 当前版本 | 下载地址 |
 | --- | --- | --- | --- |
 | **树夏Music 安卓** | 面向车机、平板和横向大屏的安卓音乐播放器支持手势控制：多平台搜索、多音质播放、歌词、频谱、歌单管理、飞牛音乐插件、洛雪插件多、端歌单同步 ；支持应用内自动更新 | v2.5.113 | [最新版 APK（本仓库最新 Release）](https://github.com/maiga512/shuxiamusic-release/releases/latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-release) |
-| **树夏Music 桌面端** | 桌面端音乐播放器（Tauri + Rust + Vue），功能与安卓版对齐：搜索、播放、歌词、歌单、飞牛音乐插件、多端歌单同步 | v1.1.1 | [desktop-latest（本仓库固定标签）](https://github.com/maiga512/shuxiamusic-release/releases/tag/desktop-latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-desktop-release) |
+| **树夏Music 桌面端** | 桌面端音乐播放器（Tauri + Rust + Vue），功能与安卓版对齐：搜索、播放、歌词、歌单、飞牛音乐插件、多端歌单同步 | v1.1.2 | [desktop-latest（本仓库固定标签）](https://github.com/maiga512/shuxiamusic-release/releases/tag/desktop-latest) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-desktop-release) |
 | **树夏Music 同步服务器** | 部署在自家 NAS 上的歌单同步服务（Docker 一键部署）：保存用户、歌单、歌曲和收藏关系，各端客户端都连它同步 | v0.1.0 | [仓库与部署文档](https://github.com/maiga512/shuxiamusic-nas-sync) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-nas-sync) |
 | **飞牛在线听歌插件** | 基于 @javycoder 同名开源项目改编增强（版权归原作者）：面向飞牛 fnOS 自带音乐应用的无侵入扩展，在线聚合搜播、管理 WebUI、边听边存，支持各平台歌单导入，多端歌单同步，搜索的歌曲添加到歌单并同步给服务器 | v2.6.67 | [.fpk 安装包（本仓库 Release 附件）](https://github.com/maiga512/shuxiamusic-release/releases/tag/fnos-fnmusic-ext-v2.6.67) · [Gitee 国内镜像](https://gitee.com/songsong2020/shuxiamusic-release/releases/tag/fnos-fnmusic-ext-v2.6.67) · [项目源码](https://github.com/maiga512/fnos_music_ext) |
 
