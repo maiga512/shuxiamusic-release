@@ -58,7 +58,6 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_REF }}
-          token: ${{ secrets.SOURCE_REPO_TOKEN }}
       - id: meta
         shell: bash
         env:
@@ -100,7 +99,6 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_REF }}
-          token: ${{ secrets.SOURCE_REPO_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -215,7 +213,6 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_REF }}
-          token: ${{ secrets.SOURCE_REPO_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -271,7 +268,6 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPOSITORY }}
           ref: ${{ env.SOURCE_REF }}
-          token: ${{ secrets.SOURCE_REPO_TOKEN }}
       - name: 从 Release 取回本次版本的产物
         env:
           GH_TOKEN: ${{ github.token }}
