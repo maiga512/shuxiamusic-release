@@ -20,8 +20,8 @@
 
 ## 树夏Music 桌面端（Windows / macOS）
 
-- **Windows x64**：下载 `shuxiamusic_1.1.3_windows-x64-setup.exe`，双击安装。
-- **macOS Apple Silicon**：下载 `shuxiamusic_1.1.3_aarch64.dmg`，打开后把“树夏Music”拖入“应用程序”。
+- **Windows x64**：下载 `shuxiamusic_1.1.4_windows-x64-setup.exe`，双击安装。
+- **macOS Apple Silicon**：下载 `shuxiamusic_1.1.4_aarch64.dmg`，打开后把“树夏Music”拖入“应用程序”。
 - `.sig` 文件只用于应用内更新器校验；手动安装时不需要单独下载或导入。
 
 ### 桌面端插件（仅树夏Music桌面端使用）
