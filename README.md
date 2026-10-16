@@ -3,7 +3,10 @@
 树夏Music 是一套「安卓/车机 + Windows/macOS 桌面 + NAS 同步服务器 + 飞牛在线听歌+iOS 飞牛音乐在线听歌加歌单打通」的多端音乐方案。
 各端共享同一套歌单、收藏和播放记忆：在任意一端收藏歌曲或建歌单，其它端自动同步。
 
-> **项目来源与架构迁移**：树夏Music 桌面版基于 [澜音 Music（Ceru Music）](https://github.com/maiga512/CeruMusic) 改进而来，将原 Electron + Vue 架构迁移为 Tauri 2 + Rust + Vue 3。感谢澜音团队的原项目与设计基础。\n> 原项目：[maiga512/CeruMusic](https://github.com/maiga512/CeruMusic) · [项目主页](https://ceru.docs.shiqianjiang.cn)\n\n## 产品与下载
+> **项目来源与架构迁移**：树夏Music 桌面版基于 [澜音 Music（Ceru Music）](https://github.com/maiga512/CeruMusic) 改进而来，将原 Electron + Vue 架构迁移为 Tauri 2 + Rust + Vue 3。感谢澜音团队的原项目与设计基础。
+> 原项目：[maiga512/CeruMusic](https://github.com/maiga512/CeruMusic) · [项目主页](https://ceru.docs.shiqianjiang.cn)
+
+## 产品与下载
 
 | 端 | 它是干嘛的 | 当前版本 | 下载地址 |
 | --- | --- | --- | --- |
@@ -18,7 +21,11 @@
 > **全部历史版本**（安卓 / 桌面 / 飞牛插件，每个版本一个 Release，可直接下载旧版本）：
 > [GitHub Release 列表](https://github.com/maiga512/shuxiamusic-release/releases) · [Gitee Release 列表](https://gitee.com/songsong2020/shuxiamusic-release/releases)
 
-## 树夏Music 桌面端（Windows / macOS）\n\n> **来源说明**：树夏Music 桌面端基于 [澜音 Music（Ceru Music）](https://github.com/maiga512/CeruMusic) 改进而来，由 Electron + Vue 迁移为 Tauri 2 + Rust + Vue 3。\n\n
+## 树夏Music 桌面端（Windows / macOS）
+
+> **来源说明**：树夏Music 桌面端基于 [澜音 Music（Ceru Music）](https://github.com/maiga512/CeruMusic) 改进而来，由 Electron + Vue 迁移为 Tauri 2 + Rust + Vue 3。
+
+
 
 - **Windows x64**：下载 `shuxiamusic_1.1.4_windows-x64-setup.exe`，双击安装。
 - **macOS Apple Silicon**：下载 `shuxiamusic_1.1.4_aarch64.dmg`，打开后把“树夏Music”拖入“应用程序”。
