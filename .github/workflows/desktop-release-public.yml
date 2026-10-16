@@ -28,7 +28,7 @@ on:
         description: '私有源码仓库的分支或标签'
         required: false
         type: string
-        default: 'desktop-v1.1.3'
+        default: 'main'
   push:
     tags:
       - 'desktop-v*'
@@ -39,7 +39,7 @@ permissions:
 env:
   NODE_VERSION: '22'
   SOURCE_REPOSITORY: maiga512/shuxiamusic-desktop
-  SOURCE_REF: ${{ inputs.source_ref || 'desktop-v1.1.3' }}
+  SOURCE_REF: ${{ inputs.source_ref || 'main' }}
   RELEASE_REPOSITORY: maiga512/shuxiamusic-release
   # 更新器端点固定读这个标签，保持与 tauri.conf.json 一致
   RELEASE_TAG: desktop-latest
