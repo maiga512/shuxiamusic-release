@@ -25,8 +25,6 @@
 
 > **来源说明**：树夏Music 桌面端基于 [澜音 Music（Ceru Music）](https://github.com/maiga512/CeruMusic) 改进而来，由 Electron + Vue 迁移为 Tauri 2 + Rust + Vue 3。
 
-
-
 - **Windows x64**：下载 `shuxiamusic_1.1.4_windows-x64-setup.exe`，双击安装。
 - **macOS Apple Silicon**：下载 `shuxiamusic_1.1.4_aarch64.dmg`，打开后把“树夏Music”拖入“应用程序”。
 - `.sig` 文件只用于应用内更新器校验；手动安装时不需要单独下载或导入。
