@@ -1,0 +1,393 @@
+name: Desktop Release Public
+
+# 三端共用一个发布仓库 maiga512/shuxiamusic-release：
+# - 安卓读“最新 Release”(releases/latest) 下载 app-release.apk
+# - 桌面读固定标签 desktop-latest 的 latest.json
+# 因此本工作流发布时必须 make_latest=false，绝不能抢走“最新 Release”指针，
+# 否则安卓的 AppUpdateManager 会拉到桌面 Release 而更新失败。
+#
+# Gitee 通道（更新器端点顺序 [Gitee, GitHub]，国内优先命中 Gitee）：全部走本机直传
+# （scripts/ci/publish-gitee-local.sh，令牌在 ~/.config/ceru/gitee_token）——GitHub 境外
+# runner 跨境传 Gitee 被限速，大文件 80+ 分钟级卡死，CI 不再上传 Gitee。
+# 本工作流只负责 GitHub 侧（desktop-latest + 版本化 Release）；CI 构建完成后在本机
+# 执行 publish-gitee-local.sh 发布 Gitee 并同步发布中心首页版本。
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本号，例如 1.0.0；留空则用 src-tauri/tauri.conf.json 里的版本'
+        required: false
+        type: string
+      release_notes:
+        description: '更新说明'
+        required: false
+        type: string
+        default: '树夏Music 桌面版更新'
+      source_ref:
+        description: '私有源码仓库的分支或标签'
+        required: false
+        type: string
+        default: 'desktop-v1.1.3'
+  push:
+    tags:
+      - 'desktop-v*'
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: '22'
+  SOURCE_REPOSITORY: maiga512/shuxiamusic-desktop
+  SOURCE_REF: ${{ inputs.source_ref || 'desktop-v1.1.3' }}
+  RELEASE_REPOSITORY: maiga512/shuxiamusic-release
+  # 更新器端点固定读这个标签，保持与 tauri.conf.json 一致
+  RELEASE_TAG: desktop-latest
+  # Gitee 桌面发布仓库（公开）。更新器端点顺序 [Gitee, GitHub]，国内优先命中 Gitee。
+  GITEE_REPOSITORY: songsong2020/shuxiamusic-desktop-release
+  GITEE_RELEASE_TAG: desktop-latest
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      notes: ${{ steps.meta.outputs.notes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_REF }}
+          token: ${{ secrets.SOURCE_REPO_TOKEN }}
+      - id: meta
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_NOTES: ${{ inputs.release_notes }}
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          version="$INPUT_VERSION"
+          if [[ -z "$version" && "$GIT_TAG" == desktop-v* ]]; then
+            version="${GIT_TAG#desktop-v}"
+          fi
+          if [[ -z "$version" ]]; then
+            version=$(python3 -c "import json;print(json.load(open('src-tauri/tauri.conf.json'))['version'])")
+          fi
+          if [[ -z "$version" ]]; then
+            echo '无法确定版本号。' >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "notes=${INPUT_NOTES:-树夏Music 桌面版更新}" >> "$GITHUB_OUTPUT"
+          echo "解析到版本: $version"
+
+  build-macos-arm64:
+    needs: prepare
+    runs-on: macos-14
+    env:
+      LABEL: aarch64
+      TRIPLE: aarch64-apple-darwin
+      VERSION: ${{ needs.prepare.outputs.version }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      # 本地开发用固定自签证书签名（见 tauri.conf.json 的 signingIdentity），
+      # 这样 macOS 辅助功能权限能跨重新编译保留。CI 运行器没有那张证书，
+      # 这里用 APPLE_SIGNING_IDENTITY 覆盖回 ad-hoc("-")，否则打包会因找不到
+      # 身份而失败。将来接入 Apple Developer ID 时改这里即可。
+      APPLE_SIGNING_IDENTITY: "-"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_REF }}
+          token: ${{ secrets.SOURCE_REPO_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - run: npm ci
+      - name: 写入版本号
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path('src-tauri/tauri.conf.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          d['version'] = os.environ['VERSION']
+          p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: 安装 mpv（打包内置运行时用）
+        run: |
+          export HOMEBREW_NO_AUTO_UPDATE=1
+          export HOMEBREW_NO_INSTALL_CLEANUP=1
+          brew install mpv
+      - name: 编译 Apple Silicon 包
+        run: |
+          npm run sidecar:prepare-runtime -- --platform darwin --arch arm64 --force
+          npm run mpv:prepare-runtime -- --platform darwin --arch arm64
+          npm run tauri -- build --target ${{ env.TRIPLE }} --bundles app,dmg
+      - name: 收集并重命名产物
+        run: bash scripts/ci/collect-macos.sh "${{ env.TRIPLE }}" "${{ env.LABEL }}" "${{ env.VERSION }}"
+      # 直接传到发布仓库的 desktop-latest，不再走 actions/upload-artifact：
+      # 公开仓库的 Release 附件不占 Actions artifact 配额，而 artifact 免费额度只有
+      # 500MB，macOS 195MB + Windows 90MB 很容易顶满，曾导致 upload-artifact 报
+      # "Artifact storage quota has been hit" 直接中断整个发布。
+      # latest.json 由 publish 作业统一生成后上传，这里只传安装包与签名。
+      - name: 上传安装包到 Release（desktop-latest）
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ env.RELEASE_REPOSITORY }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: 树夏Music 桌面版 v${{ env.VERSION }}
+          body: ${{ needs.prepare.outputs.notes }}
+          make_latest: false
+          files: release-assets/*
+          fail_on_unmatched_files: true
+
+  # Mac x64 暂时禁用：macos-latest-large 需要付费配额，当前账户配额不足
+  # 等配额问题解决后可以重新启用
+  # build-macos-x64:
+  #   needs: prepare
+  #   # macos-13 镜像已退役，任务会永远卡在 queued；Intel 用 -large 标签的运行器。
+  #   runs-on: macos-latest-large
+  #   env:
+  #     LABEL: x64
+  #     TRIPLE: x86_64-apple-darwin
+  #     VERSION: ${{ needs.prepare.outputs.version }}
+  #     TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+  #     TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #     - uses: dtolnay/rust-toolchain@stable
+  #       with:
+  #         targets: x86_64-apple-darwin
+  #     - run: npm ci
+  #     - name: 写入版本号
+  #       run: |
+  #         python3 - <<'PY'
+  #         import json, os
+  #         from pathlib import Path
+  #         p = Path('src-tauri/tauri.conf.json')
+  #         d = json.loads(p.read_text(encoding='utf-8'))
+  #         d['version'] = os.environ['VERSION']
+  #         p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+  #         PY
+  #     - name: 安装 mpv（打包内置运行时用）
+  #       run: |
+  #         export HOMEBREW_NO_AUTO_UPDATE=1
+  #         export HOMEBREW_NO_INSTALL_CLEANUP=1
+  #         brew install mpv
+  #     - name: 编译 Intel 包
+  #       run: |
+  #         npm run sidecar:prepare-runtime -- --platform darwin --arch x64 --force
+  #         npm run mpv:prepare-runtime -- --platform darwin --arch x64
+  #         npm run tauri -- build --target ${{ env.TRIPLE }} --bundles app,dmg
+  #     - name: 收集并重命名产物
+  #       run: bash scripts/ci/collect-macos.sh "${{ env.TRIPLE }}" "${{ env.LABEL }}" "${{ env.VERSION }}"
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: desktop-macos-x64
+  #         path: release-assets/*
+  #         if-no-files-found: error
+
+
+  build-windows-x64:
+    needs: prepare
+    runs-on: windows-latest
+    continue-on-error: true
+    env:
+      LABEL: windows-x64
+      TRIPLE: x86_64-pc-windows-msvc
+      VERSION: ${{ needs.prepare.outputs.version }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      CERU_MPV_WINDOWS_URL: ${{ secrets.CERU_MPV_WINDOWS_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_REF }}
+          token: ${{ secrets.SOURCE_REPO_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - run: npm ci
+      - name: 写入版本号
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path('src-tauri/tauri.conf.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          d['version'] = os.environ['VERSION']
+          p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: 编译 Windows 安装包
+        shell: bash
+        run: |
+          npm run sidecar:prepare-runtime -- --platform win32 --arch x64 --force
+          npm run mpv:prepare-runtime -- --platform win32 --arch x64
+          npm run tauri -- build --target ${{ env.TRIPLE }} --bundles nsis
+      - name: 收集并重命名产物
+        shell: bash
+        run: bash scripts/ci/collect-windows.sh "${{ env.TRIPLE }}" "${{ env.LABEL }}" "${{ env.VERSION }}"
+      - name: 上传安装包到 Release（desktop-latest）
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ env.RELEASE_REPOSITORY }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: 树夏Music 桌面版 v${{ env.VERSION }}
+          body: ${{ needs.prepare.outputs.notes }}
+          make_latest: false
+          files: release-assets/*
+          fail_on_unmatched_files: true
+
+  publish:
+    # 等两个平台都结束再生成 latest.json：构建作业已把安装包直接传到 desktop-latest，
+    # 这里按版本号把它们取回来，生成清单后再发布。Windows 作业是 continue-on-error，
+    # 编不出来时只发 macOS（make-latest-json 会跳过缺失平台），不会拖垮发布。
+    needs:
+      - prepare
+      - build-macos-arm64
+      - build-windows-x64
+    if: ${{ always() && needs.build-macos-arm64.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.SOURCE_REF }}
+          token: ${{ secrets.SOURCE_REPO_TOKEN }}
+      - name: 从 Release 取回本次版本的产物
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          mkdir -p release-assets
+          # 只取本次版本号的文件（构建作业已直传 desktop-latest），避免把历史版本
+          # 附件也拉下来。签名 .sig 与安装包同名，能被同一 pattern 命中。
+          gh release download "${{ env.RELEASE_TAG }}" \
+            -R "${{ env.RELEASE_REPOSITORY }}" \
+            -p "shuxiamusic_${VERSION}_*" \
+            -D release-assets --clobber
+          echo "已取回产物:"; ls -la release-assets
+      - name: 生成 latest.json
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          NOTES: ${{ needs.prepare.outputs.notes }}
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          RELEASE_REPOSITORY: ${{ env.RELEASE_REPOSITORY }}
+          GITEE_REPOSITORY: ${{ env.GITEE_REPOSITORY }}
+          GITEE_RELEASE_TAG: ${{ env.GITEE_RELEASE_TAG }}
+        run: |
+          python3 scripts/ci/make-latest-json.py
+          echo "生成的 latest.json (GitHub):"; cat release-assets/latest.json
+          if [ -f release-assets-gitee/latest.json ]; then
+            echo "生成的 latest.json (Gitee):"; cat release-assets-gitee/latest.json
+          fi
+      - name: 校验公开发布仓库写权限
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${RELEASE_REPOSITORY}" --jq '{full_name,permissions}' 
+      - name: 发布到 desktop-latest（make_latest=false，安卓不受影响）
+        uses: softprops/action-gh-release@v2
+        id: latest-github
+        with:
+          # 必须用 token 输入传 PAT：softprops v2 的 token 输入默认 ${{ github.token }}
+          # （Actions 自动令牌，只能写当前仓库），只设 env.GITHUB_TOKEN 不会覆盖它，
+          # 于是跨仓库写 shuxiamusic-release 时报 "Resource not accessible by integration"。
+          token: ${{ github.token }}
+          repository: ${{ env.RELEASE_REPOSITORY }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: 树夏Music 桌面版 v${{ needs.prepare.outputs.version }}
+          body: ${{ needs.prepare.outputs.notes }}
+          make_latest: false
+          # 安装包已由构建作业直传，这里只补最新的 latest.json。
+          files: release-assets/latest.json
+          fail_on_unmatched_files: true
+      # 清掉 desktop-latest 里不属于本次版本的旧附件：固定标签的 Release 会一直累积，
+      # 之前需要人工清理（Gitee 那次就是因为旧附件堆满配额）。旧版本仍可在版本化
+      # Release（desktop-v<版本>）里下载，latest.json 也只指向当前版本，删旧附件安全。
+      - name: 清理 desktop-latest 中的历史版本附件
+        if: ${{ always() && steps.latest-github.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          keep_prefix="shuxiamusic_${VERSION}_"
+          gh release view "${{ env.RELEASE_TAG }}" -R "${{ env.RELEASE_REPOSITORY }}" \
+            --json assets --jq '.assets[].name' | while read -r name; do
+            [ -n "$name" ] || continue
+            if [ "$name" = "latest.json" ]; then continue; fi
+            case "$name" in
+              "$keep_prefix"*) continue ;;
+            esac
+            echo "删除历史附件: $name"
+            gh release delete-asset "${{ env.RELEASE_TAG }}" "$name" \
+              -R "${{ env.RELEASE_REPOSITORY }}" --yes || true
+          done
+
+      # 版本化 Release：每个版本一个独立 Release（desktop-v<版本>），不被固定标签覆盖，
+      # 发布中心首页「全部历史版本」可随时下载旧版。只附安装包和签名，不附 latest.json
+      # （latest.json 只属于 desktop-latest 更新器端点）。此步失败只告警不阻断发布。
+      - name: 准备版本化 Release 附件（安装包+签名，排除 latest.json）
+        run: |
+          mkdir -p release-assets-versioned
+          for f in release-assets/*; do
+            [ -f "$f" ] || continue
+            case "$(basename "$f")" in
+              latest.json) : ;;
+              *) cp "$f" release-assets-versioned/ ;;
+            esac
+          done
+          echo "版本化 Release 附件:"; ls -la release-assets-versioned
+      - name: 发布版本化 Release desktop-v${{ needs.prepare.outputs.version }}（make_latest=false，不影响安卓）
+        if: ${{ always() && steps.latest-github.outcome == 'success' }}
+        continue-on-error: true
+        id: versioned-github
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ env.RELEASE_REPOSITORY }}
+          tag_name: desktop-v${{ needs.prepare.outputs.version }}
+          name: 树夏Music 桌面版 v${{ needs.prepare.outputs.version }}
+          body: ${{ needs.prepare.outputs.notes }}
+          make_latest: false
+          target_commitish: main
+          files: release-assets-versioned/**/*
+          fail_on_unmatched_files: true
+
+      # ── Gitee 发布全部走本机直传（GitHub 境外 runner 跨境传 Gitee 被限速，大文件 80+ 分钟级卡死）──
+      # 本工作流只发 GitHub 侧。Gitee 侧请在 CI 构建完成后于本机执行（国内直连，几分钟传完，
+      # 发布 desktop-latest + 版本化 Release，并同步发布中心首页版本）：
+      #
+      #   gh run download <RUN_ID> -D /tmp/ceru-release/work
+      #   把 desktop-macos-arm64/、desktop-windows-x64/ 里的安装包+签名平铺进
+      #   /tmp/ceru-release/work/release-assets/
+      #   scripts/ci/publish-gitee-local.sh /tmp/ceru-release/work <版本号> [更新说明]
+      #
+      # 令牌在本机 ~/.config/ceru/gitee_token（chmod 600），无需人工提供。
+      - name: Gitee 发布指引（本机直传，不走 CI 跨境上传）
+        run: |
+          echo "::notice::Gitee 发布走本机直传（CI 跨境上传限速，已不再执行）。"
+          echo "::notice::CI 构建完成后在本机执行："
+          echo "::notice::  1) gh run download ${{ github.run_id }} -D /tmp/ceru-release/work"
+          echo "::notice::  2) 把 desktop-macos-arm64/、desktop-windows-x64/ 产物平铺进 /tmp/ceru-release/work/release-assets/"
+          echo "::notice::  3) scripts/ci/publish-gitee-local.sh /tmp/ceru-release/work ${{ needs.prepare.outputs.version }} \"${{ needs.prepare.outputs.notes }}\""
