@@ -333,11 +333,20 @@ jobs:
             [ -n "$name" ] || continue
             if [ "$name" = "latest.json" ]; then continue; fi
             case "$name" in
+              # 本次版本的安装包与签名：保留
               "$keep_prefix"*) continue ;;
+              # 其它版本的安装包：删（历史版本仍可从 desktop-v<版本> 下载）
+              shuxiamusic_*)
+                echo "删除历史附件: $name"
+                gh release delete-asset "${{ env.RELEASE_TAG }}" "$name" \
+                  -R "${{ env.RELEASE_REPOSITORY }}" --yes || true
+                ;;
+              # 非版本化常驻附件（桌面端插件 feiniu-service.js / shuxia-sync-service.js，
+              # 发布中心首页直接链到 desktop-latest 下载）：不能删，删了首页链接就 404。
+              *)
+                echo "保留常驻附件: $name"
+                ;;
             esac
-            echo "删除历史附件: $name"
-            gh release delete-asset "${{ env.RELEASE_TAG }}" "$name" \
-              -R "${{ env.RELEASE_REPOSITORY }}" --yes || true
           done
 
       # 版本化 Release：每个版本一个独立 Release（desktop-v<版本>），不被固定标签覆盖，
