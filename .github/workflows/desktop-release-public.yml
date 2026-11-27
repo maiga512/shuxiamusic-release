@@ -82,7 +82,7 @@ jobs:
 
   build-macos-arm64:
     needs: prepare
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       LABEL: aarch64
       TRIPLE: aarch64-apple-darwin
